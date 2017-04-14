@@ -2,6 +2,9 @@
 //1510 Data Structures
 //
 
+#ifndef MYBSTREE_H
+#define MYBSTREE_H
+
 #include <climits>
 #include "abstractbstree.h"
 
@@ -29,7 +32,7 @@ class MyBSTree:public AbstractBSTree<T>{
     Node<T>* root;
     int tsize;
   public:
-    MyBSTree(Node<T> proot = NULL, int psize = 0){
+    MyBSTree(Node<T>* proot = NULL, int psize = 0){
       root = proot;
       tsize = psize;
     }
@@ -45,13 +48,17 @@ class MyBSTree:public AbstractBSTree<T>{
     }
      
     int height() const{
-      Node<T>* temp = root;
-      int theight = 1;
-      while(temp->left != NULL){
-        theight++;
-	temp = temp->left;
-      }
-      return theight;
+      if(root == NULL)
+        return 0;
+      return mheight(root);
+    }
+    int mheight(Node<T>* curr) const{
+      if(curr == NULL)
+        return 0;
+      if(mheight(curr->left) > mheight(curr->right))
+        return 1 + mheight(curr->left);
+      else
+        return 1 + mheight(curr->right);
     }
     
     const T& getMax() const throw(Oops){
@@ -71,17 +78,20 @@ class MyBSTree:public AbstractBSTree<T>{
     }
 
     int find(const T& x) const{return mfind(x, root);}
-    int mfind(const T& x, Node<T>* curr){
+    int mfind(const T& x, Node<T>* curr) const{
       if(curr->data == x)
         return 1;
-      return 1 + mfind(x,curr->left);
-      return 1 + mfind(x,curr->right);
-      return -1 * height();
+      if(curr->left != NULL)
+        return 1 + mfind(x,curr->left);
+      if(curr->right != NULL)
+       return 1 + mfind(x,curr->right);
+      //return -1 * height();
+      return 0;
     }
     
     void clear(){mclear(root);}
     void mclear(Node<T>* curr){
-      if(curr.isChild()){
+      if(curr->isChild()){
         delete curr;
 	return;
       }
@@ -90,53 +100,61 @@ class MyBSTree:public AbstractBSTree<T>{
       delete curr;
     }
     
-    void insert(const T& x){minsert(x,root);}
-    void minsert(const T& x, Node<T>* curr){
-      if(curr == NULL){
+    void insert(const T& x){
+      tsize++;
+      if(root != NULL)
+        minsert(x,root);
+      else
         root = new Node<T>(x);
-	return;
-      }
+    }
+    void minsert(const T& x, Node<T>* curr){
       if(curr->data == x){
+        tsize--;
         return;
       }
       if(curr->data > x){
-        minsert(x, curr->left);
+        if(curr->left == NULL)
+	  curr->left = new Node<T>(x);
+	else
+          minsert(x, curr->left);
       }
       if(curr->data < x){
-        minsert(x,curr->right);
+        if(curr->right == NULL)
+          curr->right = new Node<T>(x);
+	else
+	  minsert(x, curr->right);
       }
     }
     
     void remove(const T& x){mremove(x,root);}
     void mremove(const T& x, Node<T>* curr){
-      if(x == root){}
     }
 
     void printPreOrder() const {mprintPreOrder(root);}
-    void mprintPreOrder(Node<T>* curr){
-      if(curr->isChild())
-        return;
-      cout << curr->data;
-      mprint(curr->left);
-      mprint(curr->right);
+    void mprintPreOrder(Node<T>* curr) const{
+      if(curr != NULL){
+        cout << curr->data << ' ';
+        mprint(curr->left);
+        mprint(curr->right);
+      }
     }
 
     void printPostOrder() const {mprintPostOrder(root);}
-    void mprintPostOrder(Node<T>* curr){
-      if(curr->isChild())
-        return;
-      mprint(curr->left);
-      mprint(curr->right);
-      cout << curr->data;
+    void mprintPostOrder(Node<T>* curr) const{
+      if(curr != NULL){
+        mprint(curr->left);
+        mprint(curr->right);
+        cout << curr->data << ' ';
+      }
     }
 
-    void print() const {mprint(root);}
-    void mprint(Node<T>& curr){
-      if(curr->isChild())
-        return;
-      mprint(curr->left);
-      cout << curr->data;
-      mprint(curr->right);
+    void print() const {prettyPrint(root, 0);}
+    void mprint(Node<T>* curr) const{
+      if(curr != NULL){
+        mprint(curr->left);
+        cout << curr->data << ' ';
+        mprint(curr->right);
+      }
     }
 
     void prettyPrint (const Node<T>* t, const int pad) const {
@@ -150,3 +168,5 @@ class MyBSTree:public AbstractBSTree<T>{
       }
     }
 };
+
+#endif
